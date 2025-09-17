@@ -1,0 +1,70 @@
+-- Student Academic Performance Report
+
+type Student = (String, Int)
+
+-- Sample data
+sampleData :: [Student]
+sampleData =
+  [ ("Alice", 35)
+  , ("Bob", 55)
+  , ("Charlie", 65)
+  , ("David", 82)
+  , ("Eva", 48)
+  ]
+
+-- Classify student performance using guards
+classify :: Int -> String
+classify mark
+  | mark < 40  = "Fail"
+  | mark < 60  = "Pass"
+  | mark < 80  = "Merit"
+  | otherwise  = "Distinction"
+
+-- Convert (Name, Mark) -> (Name, Mark, Category) using recursion
+categorize :: [Student] -> [(String, Int, String)]
+categorize [] = []
+categorize ((name, mark):xs) =
+  (name, mark, classify mark) : categorize xs
+
+-- Count number of passes (mark >= 40) using recursion
+countPasses :: [Student] -> Int
+countPasses [] = 0
+countPasses ((_, mark):xs)
+  | mark >= 40 = 1 + countPasses xs
+  | otherwise  = countPasses xs
+
+-- Parse input of form "Name:Mark"
+parseRecord :: String -> Student
+parseRecord str =
+  let parts = split ':' str
+  in case parts of
+       [n, m] -> (n, read m)
+       _      -> ("Unknown", 0)
+
+-- Custom split function
+split :: Char -> String -> [String]
+split _ [] = [""]
+split delim (c:cs)
+  | c == delim = "" : rest
+  | otherwise  = (c : head rest) : tail rest
+  where
+    rest = split delim cs
+
+-- Main program
+main :: IO ()
+main = do
+  input <- getContents
+  let ls = filter (not . null) (lines input)
+      students = if null ls then sampleData else map parseRecord ls
+      categorized = categorize students
+      passCount   = countPasses students
+  putStrLn "=== Student Academic Performance Report ==="
+  mapM_ (\(n,m,c) -> putStrLn (n ++ " - " ++ show m ++ " - " ++ c)) categorized
+  putStrLn $ "Total Passed (>=40): " ++ show passCount
+
+Sample Input:
+Alice:30
+Bob:59
+Charlie:75
+David:90
+
