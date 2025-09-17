@@ -1,0 +1,73 @@
+-- Cinema Ticket Sales Report
+
+type Sale = (String, Int)
+
+-- Sample data
+sampleData :: [Sale]
+sampleData =
+  [ ("Adult", 3)
+  , ("Child", 5)
+  , ("Senior", 2)
+  , ("Adult", 4)
+  ]
+
+-- Get ticket price for a category
+ticketPrice :: String -> Int
+ticketPrice "Adult"  = 12
+ticketPrice "Child"  = 8
+ticketPrice "Senior" = 10
+ticketPrice _        = 0   -- unknown categories treated as $0
+
+-- Sum tickets for a given category (recursion)
+countCategory :: String -> [Sale] -> Int
+countCategory _ [] = 0
+countCategory cat ((c, q):xs)
+  | cat == c  = q + countCategory cat xs
+  | otherwise = countCategory cat xs
+
+-- Calculate total revenue (recursion)
+totalRevenue :: [Sale] -> Int
+totalRevenue [] = 0
+totalRevenue ((c, q):xs) =
+  (ticketPrice c * q) + totalRevenue xs
+
+-- Parse input lines of form "Category:Quantity"
+parseRecord :: String -> Sale
+parseRecord str =
+  let parts = split ':' str
+  in case parts of
+       [c, q] -> (c, read q)
+       _      -> ("Unknown", 0)
+
+-- Custom split function
+split :: Char -> String -> [String]
+split _ [] = [""]
+split delim (c:cs)
+  | c == delim = "" : rest
+  | otherwise  = (c : head rest) : tail rest
+  where
+    rest = split delim cs
+
+-- Main
+main :: IO ()
+main = do
+  input <- getContents
+  let ls = filter (not . null) (lines input)
+      sales = if null ls then sampleData else map parseRecord ls
+      adultCount  = countCategory "Adult" sales
+      childCount  = countCategory "Child" sales
+      seniorCount = countCategory "Senior" sales
+      revenue     = totalRevenue sales
+  putStrLn "=== Cinema Ticket Sales Report ==="
+  putStrLn $ "Adult Tickets:  "  ++ show adultCount
+  putStrLn $ "Child Tickets:  "  ++ show childCount
+  putStrLn $ "Senior Tickets: "  ++ show seniorCount
+  putStrLn $ "Total Revenue: $" ++ show revenue
+
+
+
+Sample input:
+Adult:2
+Child:3
+Senior:1
+Adult:1
