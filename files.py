@@ -1,3 +1,3 @@
-1_Hospital_patient_record
-2_Cinema_Ticket_Sales_Report
-3_Student_Academic_Record
+1_Hospital
+2_Cinema
+3_Student
